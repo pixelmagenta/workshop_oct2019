@@ -9,6 +9,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 library("knitr")
 library("jsonlite")
+library("httr")
 #library("curl")
 library("igraph")
 library("ggplot2")
@@ -22,7 +23,7 @@ knitr::opts_chunk$set(fig.width=13, fig.height=9, warning=FALSE, messages=FALSE)
 ## Подготовка окружения
 Для начала, установим необходимые для работы библиотеки. Строку показанную ниже нужно выполнить в консоли.
 ```{r, eval=FALSE}
-#install.packages("jsonlite", "httr", "igraph", "parallel", "ggplot2")
+install.packages(c("jsonlite", "httr", "igraph", "parallel", "ggplot2"))
 ```
 
 Подключим эти библиотеки:
@@ -70,12 +71,22 @@ plot(play_graph)
 
 Если немного поразбираться, то и с помощью `igraph` можно создать более-менее симпатичную визуализацию.
 ```{r echo=FALSE}
-V(play_graph)$label.color <- "black"
-V(play_graph)$label.cex <- 1.3
-V(play_graph)$label.degree <- -pi/2
-plot(play_graph, vertex.color="#60AEBD", vertex.frame.color="#60AEBD", vertex.label.dist = 1.3, vertex.size = 9, layout = layout_with_kk(play_graph))
+#V(play_graph)$label.color <- "black"
+#V(play_graph)$label.cex <- 1.3
+#V(play_graph)$label.degree <- -pi/2
+plot(play_graph, vertex.label.color = "black", vertex.label.cex = 1.3, vertex.label.degree = -pi/2, vertex.color = "#60AEBD", vertex.frame.color = "#60AEBD", vertex.label.dist = 1, vertex.size = 9, layout = layout_with_kk(play_graph))
 ```
 
+В `R`, также как в Gephi можно посчитать различные метрики для всех узлов сети.
+```{r}
+V(play_graph)$closeness <- closeness(play_graph, weights = NA)
+V(play_graph)$degree <- degree(play_graph)
+play_data <- as_data_frame(play_graph, what = "vertices")
+```
+Вот так примерно выглядит датафрейм, полученный из графа:
+```{r, echo=FALSE}
+kable(play_data)
+```
 
 Загрузим файлы со списком рёбер в RStudio. Для этого нам понадобится сам список пьес.
 ```{r}
@@ -98,9 +109,8 @@ plays <- lapply(plays, del_vars)
 ```
   
 Загрузим метаданные
-```{r}
-metadata <- read.csv(paste0("https://dracor.org/api/corpora/", corpusname, "/metadata.csv"),
-                     stringsAsFactors = F)
+```{r message=FALSE, warning=FALSE}
+metadata <- content(GET("https://dracor.org/api/corpora/rus/metadata", accept("text/csv")), as = "parsed")
 metadata <- metadata[order(metadata$name),]
 ```
 
@@ -110,5 +120,15 @@ kable(head(metadata))
 
 Создадим большой список, со всеми сетями
 ```{r, eval=FALSE}
-graphs_of_plays <- mclapply(plays, function(x) graph_from_data_frame(x, directed = F))
+graphs_of_plays <- lapply(plays, function(x) graph_from_data_frame(x, directed = F))
+```
+
+Пример графика
+```{r}
+plot1 <- ggplot(metadata, aes(x = yearNormalized, y = averagePathLength)) + geom_point()
+  #scale_shape_manual(values=c(21, 22), name = "Criterion 2")+
+  #scale_color_manual(values=c("slateblue3", "indianred3"), name = "Criterion 1")+
+  #scale_fill_manual(values=c("slateblue1", "indianred1"), name = "Criterion 1")+
+  #labs(x="Year of creation", y = "Clustering coefficient deviation")
+plot1
 ```

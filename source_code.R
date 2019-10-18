@@ -24,8 +24,11 @@ V(play_graph)$label.cex <- 1.3
 V(play_graph)$label.degree <- -pi/2
 plot(play_graph, vertex.label.dist = 1.3, vertex.size = 9, layout = layout_on_sphere(play_graph))
 
-V(play_graph)$bw <- betweenness(play_graph)
+V(play_graph)$closeness <- closeness(play_graph, weights = NA)
+V(play_graph)$degree <- degree(play_graph)
 play_data <- as_data_frame(play_graph, what = "vertices")
+
+ev <- data.frame(as.list(eigen_centrality(play_graph, weights = NA)$vector))
 
 list_of_names <- fromJSON("https://dracor.org/api/corpora/rus")
 
