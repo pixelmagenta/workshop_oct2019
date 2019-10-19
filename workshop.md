@@ -1,4 +1,4 @@
-Workshop
+Сети и слова: цифровые подходы к русской литературе
 ================
 Евгения Устинова
 19/10/2019
@@ -9,17 +9,13 @@ Workshop
 показанную ниже нужно выполнить в консоли.
 
 ``` r
-install.packages(c("jsonlite", "httr", "igraph", "parallel", "ggplot2"))
+install.packages("igraph")
 ```
 
-Подключим эти библиотеки:
+Подключим библиотекy:
 
 ``` r
-library("jsonlite")
-library("httr")
 library("igraph")
-library("ggplot2")
-library("parallel")
 ```
 
 ## Подготовка данных
@@ -56,9 +52,9 @@ play_graph <- set_edge_attr(play_graph, "weight", value = play_csv$Weight)
 play_graph
 ```
 
-    ## IGRAPH 72e00d9 UNW- 29 203 -- 
+    ## IGRAPH 5d5f654 UNW- 29 203 -- 
     ## + attr: name (v/c), Weight (e/n), weight (e/n)
-    ## + edges from 72e00d9 (vertex names):
+    ## + edges from 5d5f654 (vertex names):
     ##  [1] lizanka--sofija             lizanka--famusov           
     ##  [3] lizanka--molchalin          lizanka--chatskij          
     ##  [5] lizanka--skalozub           sofija --famusov           
@@ -122,6 +118,17 @@ play_data <- as_data_frame(play_graph, what = "vertices")
 | lakej\_4-1             | lakej\_4-1             | 0.0158730 |      2 |
 | gd                     | gd                     | 0.0163934 |      2 |
 
+``` r
+install.packages(c("jsonlite", "httr", "ggplot2"))
+```
+
+``` r
+library("jsonlite")
+library("httr")
+library("igraph")
+library("ggplot2")
+```
+
 Загрузим файлы со списком рёбер в RStudio. Для этого нам понадобится сам
 список пьес.
 
@@ -168,15 +175,17 @@ metadata <- metadata[order(metadata$name),]
 graphs_of_plays <- lapply(plays, function(x) graph_from_data_frame(x, directed = F))
 ```
 
+Посчитаем плотность рёбер и добавим эти данные в таблицу с метаданными
+
+``` r
+metadata$edge_density <- sapply(graphs_of_plays, function(x) edge_density(x, loops = FALSE))
+```
+
 Пример графика
 
 ``` r
 plot1 <- ggplot(metadata, aes(x = yearNormalized, y = averagePathLength)) + geom_point()
-  #scale_shape_manual(values=c(21, 22), name = "Criterion 2")+
-  #scale_color_manual(values=c("slateblue3", "indianred3"), name = "Criterion 1")+
-  #scale_fill_manual(values=c("slateblue1", "indianred1"), name = "Criterion 1")+
-  #labs(x="Year of creation", y = "Clustering coefficient deviation")
 plot1
 ```
 
-![](workshop_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](workshop_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->

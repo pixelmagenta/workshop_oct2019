@@ -1,5 +1,5 @@
 ---
-title: "Workshop"
+title: "Сети и слова: цифровые подходы к русской литературе"
 author: "Евгения Устинова"
 date: "19/10/2019"
 output: github_document
@@ -13,7 +13,6 @@ library("httr")
 #library("curl")
 library("igraph")
 library("ggplot2")
-library("parallel")
 ```
 
 ```{r global_options, include=FALSE}
@@ -23,16 +22,12 @@ knitr::opts_chunk$set(fig.width=13, fig.height=9, warning=FALSE, messages=FALSE)
 ## Подготовка окружения
 Для начала, установим необходимые для работы библиотеки. Строку показанную ниже нужно выполнить в консоли.
 ```{r, eval=FALSE}
-install.packages(c("jsonlite", "httr", "igraph", "parallel", "ggplot2"))
+install.packages("igraph")
 ```
 
-Подключим эти библиотеки:
+Подключим библиотекy:
 ```{r, eval=FALSE}
-library("jsonlite")
-library("httr")
 library("igraph")
-library("ggplot2")
-library("parallel")
 ```
 
 ## Подготовка данных
@@ -88,6 +83,18 @@ play_data <- as_data_frame(play_graph, what = "vertices")
 kable(play_data)
 ```
 
+
+```{r, eval=FALSE}
+install.packages(c("jsonlite", "httr", "ggplot2"))
+```
+
+```{r, eval=FALSE}
+library("jsonlite")
+library("httr")
+library("igraph")
+library("ggplot2")
+```
+
 Загрузим файлы со списком рёбер в RStudio. Для этого нам понадобится сам список пьес.
 ```{r}
 list_of_names <- fromJSON("https://dracor.org/api/corpora/rus")
@@ -119,16 +126,17 @@ kable(head(metadata))
 ```
 
 Создадим большой список, со всеми сетями
-```{r, eval=FALSE}
+```{r}
 graphs_of_plays <- lapply(plays, function(x) graph_from_data_frame(x, directed = F))
+```
+
+Посчитаем плотность рёбер и добавим эти данные в таблицу с метаданными
+```{r}
+metadata$edge_density <- sapply(graphs_of_plays, function(x) edge_density(x, loops = FALSE))
 ```
 
 Пример графика
 ```{r}
 plot1 <- ggplot(metadata, aes(x = yearNormalized, y = averagePathLength)) + geom_point()
-  #scale_shape_manual(values=c(21, 22), name = "Criterion 2")+
-  #scale_color_manual(values=c("slateblue3", "indianred3"), name = "Criterion 1")+
-  #scale_fill_manual(values=c("slateblue1", "indianred1"), name = "Criterion 1")+
-  #labs(x="Year of creation", y = "Clustering coefficient deviation")
 plot1
 ```
