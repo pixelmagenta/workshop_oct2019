@@ -1,6 +1,5 @@
 Сети и слова: цифровые подходы к русской литературе
 ================
-Евгения Устинова
 19/10/2019
 
 ## Подготовка окружения
@@ -52,9 +51,9 @@ play_graph <- set_edge_attr(play_graph, "weight", value = play_csv$Weight)
 play_graph
 ```
 
-    ## IGRAPH 5d5f654 UNW- 29 203 -- 
+    ## IGRAPH 23870f1 UNW- 29 203 -- 
     ## + attr: name (v/c), Weight (e/n), weight (e/n)
-    ## + edges from 5d5f654 (vertex names):
+    ## + edges from 23870f1 (vertex names):
     ##  [1] lizanka--sofija             lizanka--famusov           
     ##  [3] lizanka--molchalin          lizanka--chatskij          
     ##  [5] lizanka--skalozub           sofija --famusov           
